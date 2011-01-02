@@ -3,9 +3,33 @@ package Lllo::Utils;
 use strict;
 use warnings;
 use String::Random;
+use File::HomeDir;
+use File::Spec::Functions qw(catfile);
+use JSON::XS;
 
 use Devel::Peek;
 use Data::Dumper;
+
+sub readConfig {
+    my $code = shift || 'foo';
+    my $name = shift || 'bar';
+
+    my $file = catfile(File::HomeDir->my_home, 'config', $code, $name . '.json');
+
+    unless (-e $file) {
+        die "Please specify the existing file.";
+    }
+
+    my $json = '';
+    open(my $fh, '<', $file) or die "Failed to open file. $file";
+    while (<$fh>) {
+        chomp;
+        $json .= $_;
+    }
+    close($fh);
+
+    return JSON::XS->new->utf8->decode($json);
+}
 
 sub langConvStr2Code {
     my $str = shift;
